@@ -1,37 +1,36 @@
 name: Build and Push Image
 run-name: Build and Push Image
+on: [push]
 
-on:
-  push:
-    branches:
-      - main
+permissions:
+  contents: read
+  packages: write  
 
 jobs:
   build-push-image:
     runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-      packages: write
-
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
 
       - name: Build image
-        run: docker build -t imageku:latest .
+        run: docker build -t build-image-github .
 
       - name: List image
         run: docker images
 
-      - name: Check image history
-        run: docker history imageku:latest
-
-      - name: Login to GitHub Container Registry (GHCR)
-        run: echo "${{ secrets.TOKEN_GITHUB }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+      - name: Cek isi image
+        run: docker history build-image-github:latest
+     
+      - name: Login ke GitHub Container Registry
+        uses: docker/login-action@v3
+        with: 
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.TOKEN_GITHUB }}
 
       - name: Tag image
-        run: docker tag imageku:latest ghcr.io/${{ github.repository_owner }}/imageku:latest
+        run: docker tag build-image-github ghcr.io/windawzy/build-image-github:latest
 
       - name: Push Image
-        run: docker push ghcr.io/${{ github.repository_owner }}/imageku:latest
+        run: docker push ghcr.io/windawzy/build-image-github:latest
