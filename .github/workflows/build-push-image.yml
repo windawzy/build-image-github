@@ -27,7 +27,7 @@ jobs:
         with: 
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.TOKEN_GITHUB }}
 
       - name: Tag image
         run: docker tag build-image-github ghcr.io/windawzy/build-image-github:latest
