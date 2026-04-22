@@ -1,45 +1,56 @@
 name: Build and Push Image
 run-name: Build and Push Image
+on: [push]
+jobs:
+  build-push-image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
 
+      - name: Build image
+        run: docker build -t imageku .
+
+      - name: List image
+        run: docker images
+
+      - name: Cek isi image
+        run: docker history imageku:latest
+
+      - name: Login to GitHub Registry
+        run: echo ${{ secrets.TOKEN_GITHUB }} | docker login ghcr.io -uname: Build and Push Image
+run-name: Build and Push Image
 on: [push]
 
 permissions:
-contents: read
-packages: write
+  contents: read
+  packages: write  
 
 jobs:
-build-push-image:
-runs-on: ubuntu-latest
+  build-push-image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
 
-```
-steps:
-  - name: Check out repository code
-    uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t build-image-github .
 
-  - name: Login ke Registry Adinusa
-    run: echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login registry.adinusa.id -u ${{ secrets.REGISTRY_USERNAME }} --password-stdin
+      - name: List image
+        run: docker images
 
-  - name: Build image
-    run: docker build -t imageku .
+      - name: Cek isi image
+        run: docker history build-image-github:latest
+     
+      - name: Login ke GitHub Container Registry
+        uses: docker/login-action@v3
+        with: 
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.TOKEN_GITHUB }}
 
-  - name: List image
-    run: docker images
+      - name: Tag image
+        run: docker tag build-image-github ghcr.io/windawzy/build-image-github:latest
 
-  - name: Cek isi image
-    run: docker history imageku:latest
-
-  - name: Login to GitHub Registry
-    run: echo "${{ secrets.TOKEN_GITHUB }}" | docker login ghcr.io -u windawzy --password-stdin
-
-  - name: Tag image
-    run: docker tag imageku ghcr.io/windawzy/imageku:latest
-
-  - name: Push Image
-    run: docker push ghcr.io/windawzy/imageku:latest
-
-  - name: Logout
-    run: |
-      docker logout registry.adinusa.id
-      docker logout ghcr.io
-```
-
+      - name: Push Image
+        run: docker push ghcr.io/windawzy/build-image-github:latest
